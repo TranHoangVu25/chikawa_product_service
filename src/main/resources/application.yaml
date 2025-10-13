@@ -25,3 +25,6 @@ spring:
           max-attempts: 3
           initial-interval: 1000
           multiplier: 2.0
+
+server:
+  port: 8082
