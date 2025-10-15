@@ -2,11 +2,10 @@ package com.example.product_service.services;
 
 import com.example.product_service.dto.request.CreateProductRequest;
 import com.example.product_service.dto.request.UpdateProductRequest;
+import com.example.product_service.dto.response.ApiResponse;
 import com.example.product_service.models.Product;
-import com.example.product_service.models.Variant;
 import com.example.product_service.repositories.ProductRepository;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
@@ -20,7 +19,7 @@ public class ProductServiceImpl implements ProductService {
     ProductRepository productRepository;
 
     @Override
-    public Product createProduct(CreateProductRequest request) {
+    public ApiResponse<Product> createProduct(CreateProductRequest request) {
         Product product = Product.builder()
                 .product_id(request.getProduct_id())
                 .url(request.getUrl())
@@ -33,11 +32,13 @@ public class ProductServiceImpl implements ProductService {
                 .categories(request.getCategories())
                 .characters(request.getCharacters())
                 .build();
-        return productRepository.save(product);
+        return ApiResponse.<Product>builder()
+                .result(productRepository.save(product))
+                .build();
     }
 
     @Override
-    public Product updateProduct(String productId, UpdateProductRequest request) {
+    public ApiResponse<Product> updateProduct(String productId, UpdateProductRequest request) {
         Product product = productRepository.findByProduct_Id(productId)
                 .orElseThrow(() -> new RuntimeException("In update. Product was not found"));
         product.setUrl(request.getUrl());
@@ -50,7 +51,9 @@ public class ProductServiceImpl implements ProductService {
         product.setCategories(request.getCategories());
         product.setCharacters(request.getCharacters());
 
-        return productRepository.save(product);
+        return ApiResponse.<Product>builder()
+                .result(productRepository.save(product))
+                .build();
     }
 
     @Override

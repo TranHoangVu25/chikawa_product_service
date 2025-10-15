@@ -2,6 +2,7 @@ package com.example.product_service.controllers;
 
 import com.example.product_service.dto.request.CreateProductRequest;
 import com.example.product_service.dto.request.UpdateProductRequest;
+import com.example.product_service.dto.response.ApiResponse;
 import com.example.product_service.models.Product;
 import com.example.product_service.services.ProductService;
 import lombok.AccessLevel;
@@ -25,7 +26,7 @@ public class ProductController {
     }
 
     @PostMapping()
-    public Product createProduct(
+    public ApiResponse<Product> createProduct(
             @RequestBody CreateProductRequest request
             ){
         return productService.createProduct(request);
@@ -39,7 +40,7 @@ public class ProductController {
 
     //update theo product Id
     @PutMapping("/{productId}")
-    public Product updateProduct(@PathVariable String productId,
+    public ApiResponse<Product> updateProduct(@PathVariable String productId,
                                  @RequestBody UpdateProductRequest request
                                  ){
         return productService.updateProduct(productId,request);
