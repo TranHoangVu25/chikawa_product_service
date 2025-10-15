@@ -2,6 +2,7 @@ package com.example.product_service.models;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.annotation.Id;
 
 @Data
 @NoArgsConstructor

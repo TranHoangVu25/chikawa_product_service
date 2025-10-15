@@ -8,7 +8,9 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 public interface ProductRepository extends MongoRepository<Product,String> {
-    @Query("{ 'product.id' : ?0 }")
+    @Query("{ 'product_id' : ?0 }")
     Optional<Product> findByProduct_Id(String productId);
+    @Query(value = "{ 'product_id' : ?0 }", delete = true)
+    void deleteByProduct_Id(String productId);
 
 }

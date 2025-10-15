@@ -1,10 +1,10 @@
 package com.example.product_service.models;
 
 import lombok.*;
-import lombok.experimental.FieldDefaults;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.DBRef;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.util.List;
 
@@ -17,6 +17,8 @@ public class Product {
     @Id
     private String id;
 
+    @Field("product_id")
+    @Indexed(unique = true)
     private String product_id;
 
     private String url;
@@ -33,9 +35,7 @@ public class Product {
 
     private List<Variant> variants;
 
-    @DBRef
     private List<Category> categories;
 
-    @DBRef
     private List<CharacterEntity> characters;
 }

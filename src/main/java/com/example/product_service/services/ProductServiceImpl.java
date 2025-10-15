@@ -3,6 +3,7 @@ package com.example.product_service.services;
 import com.example.product_service.dto.request.CreateProductRequest;
 import com.example.product_service.dto.request.UpdateProductRequest;
 import com.example.product_service.models.Product;
+import com.example.product_service.models.Variant;
 import com.example.product_service.repositories.ProductRepository;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -59,6 +60,6 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public void deleteProduct(String productId) {
-        productRepository.deleteById(productId);
+        productRepository.deleteByProduct_Id(productId);
     }
 }

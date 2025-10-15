@@ -30,10 +30,14 @@ public class ProductController {
             ){
         return productService.createProduct(request);
     }
+
+    //delete theo product id
     @DeleteMapping("/{productId}")
     public void deleteProduct(@PathVariable String productId){
         productService.deleteProduct(productId);
     }
+
+    //update theo product Id
     @PutMapping("/{productId}")
     public Product updateProduct(@PathVariable String productId,
                                  @RequestBody UpdateProductRequest request
