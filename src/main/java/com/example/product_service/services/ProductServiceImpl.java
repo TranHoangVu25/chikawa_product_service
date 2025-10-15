@@ -8,10 +8,12 @@ import com.example.product_service.repositories.ProductRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -57,12 +59,35 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public List<Product> findAllProduct() {
-        return productRepository.findAll();
+    public ApiResponse<List<Product>> findAllProduct() {
+        List<Product> products = productRepository.findAll();
+        if (products.isEmpty()){
+            return ApiResponse.<List<Product>>builder()
+                    .message("No product was found")
+                    .result(List.of())
+                    .build();
+        }
+        return ApiResponse.<List<Product>>builder()
+                .message("Get all products successfully")
+                .result(products)
+                .build();
     }
 
     @Override
-    public void deleteProduct(String productId) {
+    public ApiResponse<String> deleteProduct(String productId) {
+        if(!productRepository.existsByProductId(productId)){
+            return ApiResponse.<String>builder()
+                    .message("Product Id not found")
+                    .build();
+        }
         productRepository.deleteByProduct_Id(productId);
+        return ApiResponse.<String>builder()
+                .message("Delete successful")
+                .build();
+    }
+
+    @Override
+    public ApiResponse<String> addToCart(Integer userId, String jwt) {
+        return null;
     }
 }

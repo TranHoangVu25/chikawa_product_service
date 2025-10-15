@@ -15,7 +15,9 @@ public interface ProductService {
 
     ApiResponse<Product> updateProduct(String productId,UpdateProductRequest request);
 
-    List<Product> findAllProduct();
+    ApiResponse<List<Product>> findAllProduct();
 
-    void deleteProduct(String productId);
+    ApiResponse<String> deleteProduct(String productId);
+
+    ApiResponse<String> addToCart(Integer userId, String jwt);
 }

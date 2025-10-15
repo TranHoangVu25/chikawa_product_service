@@ -8,7 +8,6 @@ import com.example.product_service.services.ProductService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,7 +20,7 @@ public class ProductController {
     ProductService productService;
 
     @GetMapping()
-    public List<Product> getAllProduct(){
+    public ApiResponse<List<Product>> getAllProduct(){
         return productService.findAllProduct();
     }
 
@@ -34,8 +33,8 @@ public class ProductController {
 
     //delete theo product id
     @DeleteMapping("/{productId}")
-    public void deleteProduct(@PathVariable String productId){
-        productService.deleteProduct(productId);
+    public ApiResponse<String> deleteProduct(@PathVariable String productId){
+        return productService.deleteProduct(productId);
     }
 
     //update theo product Id
