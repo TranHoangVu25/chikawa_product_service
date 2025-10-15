@@ -22,8 +22,7 @@ import static org.springframework.security.config.Customizer.withDefaults;
 public class SecurityConfig {
 
     private final String[] USER_END_POINT = {
-            "/api/v1/products","/api/v1/products/**",
-            "/api/v1/products/**", "/api/v1/products/"
+            "/api/v1/products","/api/v1/products/**"
     };
 //    private final String[] ADMIN_END_POINT = {
 //            "/api/v1/products/get-orders","/api/v1/order/{id}"

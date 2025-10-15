@@ -4,12 +4,14 @@ import com.nimbusds.jose.JWSVerifier;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.security.oauth2.jwt.JwtException;
-import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
+import org.springframework.security.oauth2.core.OAuth2TokenValidator;
+import org.springframework.security.oauth2.core.OAuth2TokenValidatorResult;
+import org.springframework.security.oauth2.jwt.*;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.spec.SecretKeySpec;
@@ -18,13 +20,13 @@ import java.util.Objects;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class CustomJwtDecoder implements JwtDecoder {
 
     @Value("${jwt.signerKey}")
     private String signerKey;
 
     private NimbusJwtDecoder nimbusJwtDecoder = null;
-
     @Override
     public Jwt decode(String token) throws JwtException {
         try {
@@ -37,10 +39,10 @@ public class CustomJwtDecoder implements JwtDecoder {
             }
 
             // check expiry
-            JWTClaimsSet claims = signedJWT.getJWTClaimsSet();
-            if (claims.getExpirationTime() == null || claims.getExpirationTime().before(new java.util.Date())) {
-                throw new JwtException("JWT token expired");
-            }
+//            JWTClaimsSet claims = signedJWT.getJWTClaimsSet();
+//            if (claims.getExpirationTime() == null || claims.getExpirationTime().before(new java.util.Date())) {
+//                throw new JwtException("JWT token expired");
+//            }
 
             // tạo NimbusJwtDecoder (lazy init)
             if (Objects.isNull(nimbusJwtDecoder)) {
@@ -48,8 +50,11 @@ public class CustomJwtDecoder implements JwtDecoder {
                 nimbusJwtDecoder = NimbusJwtDecoder.withSecretKey(secretKeySpec)
                         .macAlgorithm(org.springframework.security.oauth2.jose.jws.MacAlgorithm.HS256)
                         .build();
-            }
 
+                //============bỏ qua kiểm tra jwt==============
+                OAuth2TokenValidator<Jwt> ignoreExpirationValidator = jwt -> OAuth2TokenValidatorResult.success();
+                nimbusJwtDecoder.setJwtValidator(ignoreExpirationValidator);
+            }
             // decode bằng NimbusJwtDecoder để trả về Jwt cho Spring Security
             Jwt jwt = nimbusJwtDecoder.decode(token);
             log.info("JWT token: {}", token);
