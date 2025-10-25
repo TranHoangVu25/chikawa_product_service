@@ -1,5 +1,6 @@
 package com.example.product_service.services;
 
+import com.example.product_service.dto.request.CartItemRequest;
 import com.example.product_service.dto.request.CreateProductRequest;
 import com.example.product_service.dto.request.UpdateProductRequest;
 import com.example.product_service.dto.response.ApiResponse;
@@ -19,5 +20,4 @@ public interface ProductService {
 
     ApiResponse<String> deleteProduct(String productId);
 
-    ApiResponse<String> addToCart(Integer userId, String jwt);
 }

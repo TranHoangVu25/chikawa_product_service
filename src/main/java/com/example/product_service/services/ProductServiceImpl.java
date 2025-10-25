@@ -1,5 +1,6 @@
 package com.example.product_service.services;
 
+import com.example.product_service.dto.request.CartItemRequest;
 import com.example.product_service.dto.request.CreateProductRequest;
 import com.example.product_service.dto.request.UpdateProductRequest;
 import com.example.product_service.dto.response.ApiResponse;
@@ -9,7 +10,12 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 
@@ -19,6 +25,8 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ProductServiceImpl implements ProductService {
     ProductRepository productRepository;
+    RestTemplate restTemplate;
+    String CART_SERVICE_URL = "http://localhost:8082/api/v1/cart";
 
     @Override
     public ApiResponse<Product> createProduct(CreateProductRequest request) {
@@ -30,6 +38,7 @@ public class ProductServiceImpl implements ProductService {
                 .price(request.getPrice())
                 .vendor(request.getVendor())
                 .images(request.getImages())
+                .quantity(request.getQuantity())
                 .variants(request.getVariants())
                 .categories(request.getCategories())
                 .characters(request.getCharacters())
@@ -49,6 +58,7 @@ public class ProductServiceImpl implements ProductService {
         product.setPrice(request.getPrice());
         product.setVendor(request.getVendor());
         product.setImages(request.getImages());
+        product.setQuantity(request.getQuantity());
         product.setVariants(request.getVariants());
         product.setCategories(request.getCategories());
         product.setCharacters(request.getCharacters());
@@ -86,8 +96,4 @@ public class ProductServiceImpl implements ProductService {
                 .build();
     }
 
-    @Override
-    public ApiResponse<String> addToCart(Integer userId, String jwt) {
-        return null;
-    }
 }

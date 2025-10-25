@@ -31,6 +31,8 @@ public class Product {
 
     private String vendor;
 
+    private int quantity;
+
     private List<String> images;
 
     private List<Variant> variants;
