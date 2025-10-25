@@ -13,7 +13,6 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UpdateProductRequest {
-    private String url;
 
     private String name;
 
@@ -21,9 +20,9 @@ public class UpdateProductRequest {
 
     private Double price;
 
-    private String vendor;
+    private String status;
 
-    private int quantity;
+    private String vendor;
 
     private List<String> images;
 

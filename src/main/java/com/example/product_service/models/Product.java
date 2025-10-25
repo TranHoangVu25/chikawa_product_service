@@ -12,16 +12,11 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Document(collection = "products")
+@Document(collection = "product_serviceh")
 public class Product {
     @Id
+    @Field("id")
     private String id;
-
-    @Field("product_id")
-    @Indexed(unique = true)
-    private String product_id;
-
-    private String url;
 
     private String name;
 
@@ -29,9 +24,9 @@ public class Product {
 
     private Double price;
 
-    private String vendor;
+    private String status;
 
-    private int quantity;
+    private String vendor;
 
     private List<String> images;
 

@@ -18,9 +18,7 @@ import java.util.List;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class CreateProductRequest {
-    private String product_id;
-
-    private String url;
+    private String id;
 
     private String name;
 
@@ -28,9 +26,9 @@ public class CreateProductRequest {
 
     private Double price;
 
-    private String vendor;
+    private String status;
 
-    private int quantity;
+    private String vendor;
 
     private List<String> images;
 

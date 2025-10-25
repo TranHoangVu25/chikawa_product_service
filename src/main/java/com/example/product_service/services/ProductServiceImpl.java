@@ -31,14 +31,13 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public ApiResponse<Product> createProduct(CreateProductRequest request) {
         Product product = Product.builder()
-                .product_id(request.getProduct_id())
-                .url(request.getUrl())
+                .id(request.getId())
                 .name(request.getName())
                 .description(request.getDescription())
                 .price(request.getPrice())
+                .status(request.getStatus())
                 .vendor(request.getVendor())
                 .images(request.getImages())
-                .quantity(request.getQuantity())
                 .variants(request.getVariants())
                 .categories(request.getCategories())
                 .characters(request.getCharacters())
@@ -49,16 +48,15 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ApiResponse<Product> updateProduct(String productId, UpdateProductRequest request) {
-        Product product = productRepository.findByProduct_Id(productId)
+    public ApiResponse<Product> updateProduct(String id, UpdateProductRequest request) {
+        Product product = productRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("In update. Product was not found"));
-        product.setUrl(request.getUrl());
         product.setName(request.getName());
         product.setDescription(request.getDescription());
         product.setPrice(request.getPrice());
+        product.setStatus(request.getStatus());
         product.setVendor(request.getVendor());
         product.setImages(request.getImages());
-        product.setQuantity(request.getQuantity());
         product.setVariants(request.getVariants());
         product.setCategories(request.getCategories());
         product.setCharacters(request.getCharacters());
@@ -84,16 +82,15 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ApiResponse<String> deleteProduct(String productId) {
-        if(!productRepository.existsByProductId(productId)){
+    public ApiResponse<String> deleteProduct(String id) {
+        if(!productRepository.existsById(id)){
             return ApiResponse.<String>builder()
                     .message("Product Id not found")
                     .build();
         }
-        productRepository.deleteByProduct_Id(productId);
+        productRepository.deleteById(id);
         return ApiResponse.<String>builder()
                 .message("Delete successful")
                 .build();
     }
-
 }
