@@ -1,15 +1,20 @@
 package com.example.product_service.services;
 
+import com.example.product_service.configuration.RabbitMQConfig;
 import com.example.product_service.dto.request.CartItemRequest;
 import com.example.product_service.dto.request.CreateProductRequest;
+import com.example.product_service.dto.request.ProductSearchEvent;
 import com.example.product_service.dto.request.UpdateProductRequest;
 import com.example.product_service.dto.response.ApiResponse;
+import com.example.product_service.models.Category;
+import com.example.product_service.models.CharacterEntity;
 import com.example.product_service.models.Product;
 import com.example.product_service.repositories.ProductRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -30,6 +35,9 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ApiResponse<Product> createProduct(CreateProductRequest request) {
+        if (productRepository.existsById(request.getId())){
+            throw new RuntimeException("id is existed");
+        }
         Product product = Product.builder()
                 .id(request.getId())
                 .name(request.getName())
@@ -68,17 +76,23 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ApiResponse<List<Product>> findAllProduct() {
-        List<Product> products = productRepository.findAll();
-        if (products.isEmpty()){
+        try {
+            List<Product> products = productRepository.findAll();
+            if (products.isEmpty()){
+                return ApiResponse.<List<Product>>builder()
+                        .message("No product was found")
+                        .result(List.of())
+                        .build();
+            }
             return ApiResponse.<List<Product>>builder()
-                    .message("No product was found")
-                    .result(List.of())
-                    .build();
+                    .message("Get all products successfully")
+                    .result(products)
+                    .build();        } catch (Exception e) {
+            e.printStackTrace(); // Log stacktrace
+            throw new RuntimeException("Error fetching products", e);
         }
-        return ApiResponse.<List<Product>>builder()
-                .message("Get all products successfully")
-                .result(products)
-                .build();
+
+
     }
 
     @Override
@@ -92,5 +106,36 @@ public class ProductServiceImpl implements ProductService {
         return ApiResponse.<String>builder()
                 .message("Delete successful")
                 .build();
+    }
+
+    private final RabbitTemplate rabbitTemplate;
+
+    public Product createProduct_rabbit(Product product) {
+        if (productRepository.existsById(product.getId())){
+            throw new RuntimeException("id is existed");
+        }
+        Product saved = productRepository.save(product);
+
+        // Gửi event sang RabbitMQ
+        ProductSearchEvent event = ProductSearchEvent.builder()
+                .id(saved.getId())
+                .name(saved.getName())
+                .description(saved.getDescription())
+                .price(saved.getPrice())
+                .categories(saved.getCategories().stream()
+                        .map(Category::getName)
+                        .toList())
+                .characters(saved.getCharacters().stream()
+                        .map(CharacterEntity::getName)
+                        .toList())
+                .build();
+
+        rabbitTemplate.convertAndSend(
+                RabbitMQConfig.EXCHANGE,
+                RabbitMQConfig.ROUTING_KEY,
+                event
+        );
+        System.out.println("📤 Sent to RabbitMQ: " + event.getName());
+        return saved;
     }
 }

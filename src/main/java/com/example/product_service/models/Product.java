@@ -12,10 +12,9 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Document(collection = "product_serviceh")
+@Document(collection = "product_service")
 public class Product {
     @Id
-    @Field("id")
     private String id;
 
     private String name;

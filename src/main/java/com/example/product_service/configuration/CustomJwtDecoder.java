@@ -35,10 +35,10 @@ public class CustomJwtDecoder implements JwtDecoder {
             }
 
             // check expiry
-            JWTClaimsSet claims = signedJWT.getJWTClaimsSet();
-            if (claims.getExpirationTime() == null || claims.getExpirationTime().before(new java.util.Date())) {
-                throw new JwtException("JWT token expired");
-            }
+//            JWTClaimsSet claims = signedJWT.getJWTClaimsSet();
+//            if (claims.getExpirationTime() == null || claims.getExpirationTime().before(new java.util.Date())) {
+//                throw new JwtException("JWT token expired");
+//            }
 
             // tạo NimbusJwtDecoder (lazy init)
             if (Objects.isNull(nimbusJwtDecoder)) {
@@ -46,7 +46,6 @@ public class CustomJwtDecoder implements JwtDecoder {
                 nimbusJwtDecoder = NimbusJwtDecoder.withSecretKey(secretKeySpec)
                         .macAlgorithm(org.springframework.security.oauth2.jose.jws.MacAlgorithm.HS256)
                         .build();
-
             }
             // decode bằng NimbusJwtDecoder để trả về Jwt cho Spring Security
             Jwt jwt = nimbusJwtDecoder.decode(token);

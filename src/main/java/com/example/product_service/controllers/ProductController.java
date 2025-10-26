@@ -9,6 +9,7 @@ import com.example.product_service.services.ProductService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
@@ -19,10 +20,11 @@ import java.util.List;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("api/v1/products")
+@Slf4j
 public class ProductController {
     ProductService productService;
 
-    @GetMapping()
+    @GetMapping("/all")
     public ApiResponse<List<Product>> getAllProduct(){
         return productService.findAllProduct();
     }
@@ -46,5 +48,11 @@ public class ProductController {
                                  @RequestBody UpdateProductRequest request
                                  ){
         return productService.updateProduct(productId,request);
+    }
+
+    @PostMapping("/test")
+    public Product add(@RequestBody Product product) {
+        log.info("in test rabiit mq");
+        return productService.createProduct_rabbit(product);
     }
 }

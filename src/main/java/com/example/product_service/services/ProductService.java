@@ -19,5 +19,5 @@ public interface ProductService {
     ApiResponse<List<Product>> findAllProduct();
 
     ApiResponse<String> deleteProduct(String productId);
-
+    Product createProduct_rabbit(Product product);
 }
