@@ -33,7 +33,6 @@ public class RabbitMQConfig {
         template.setMessageConverter(new Jackson2JsonMessageConverter());
         return template;
     }
-
 }
 
 

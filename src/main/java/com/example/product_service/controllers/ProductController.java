@@ -9,6 +9,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,7 +23,7 @@ public class ProductController {
     ProductService productService;
 
     @GetMapping("/all")
-    public ApiResponse<List<Product>> getAllProduct(){
+    public ApiResponse<List<Product>> getAllProduct() {
         return productService.findAllProduct();
     }
 
@@ -35,16 +36,16 @@ public class ProductController {
 
     //delete theo product id
     @DeleteMapping("/{productId}")
-    public ApiResponse<String> deleteProduct(@PathVariable String productId){
+    public ResponseEntity<ApiResponse<String>> deleteProduct(@PathVariable String productId) {
         return productService.deleteProduct(productId);
     }
 
-    //update theo product Id
+    //update for id and sent to RabbitMQ
     @PutMapping("/{productId}")
-    public ApiResponse<Product> updateProduct(@PathVariable String productId,
-                                 @RequestBody UpdateProductRequest request
-                                 ){
-        return productService.updateProduct(productId,request);
+    public ResponseEntity<ApiResponse<Product>> updateProduct(@PathVariable String productId,
+                                                              @RequestBody UpdateProductRequest request
+    ) {
+        return productService.updateProduct(productId, request);
     }
 
     //create product and send data to rabbitMq
