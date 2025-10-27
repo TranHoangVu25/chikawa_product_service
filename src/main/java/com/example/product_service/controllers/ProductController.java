@@ -1,6 +1,5 @@
 package com.example.product_service.controllers;
 
-import com.example.product_service.dto.request.CartItemRequest;
 import com.example.product_service.dto.request.CreateProductRequest;
 import com.example.product_service.dto.request.UpdateProductRequest;
 import com.example.product_service.dto.response.ApiResponse;
@@ -10,8 +9,6 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -51,8 +48,8 @@ public class ProductController {
     }
 
     @PostMapping("/test")
-    public Product add(@RequestBody Product product) {
-        log.info("in test rabiit mq");
+    public ApiResponse<Product> add(@RequestBody Product product) {
+        log.info("in test rabbit mq");
         return productService.createProduct_rabbit(product);
     }
 }

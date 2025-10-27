@@ -3,6 +3,7 @@ package com.example.product_service.dto.response;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.springframework.http.HttpStatusCode;
 
 @Data
 @NoArgsConstructor
@@ -14,4 +15,5 @@ public class ApiResponse<T> {
     int code=1000;
     String message;
     T result;
+    HttpStatusCode statusCode;
 }

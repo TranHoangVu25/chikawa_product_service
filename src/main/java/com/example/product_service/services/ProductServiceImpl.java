@@ -6,6 +6,7 @@ import com.example.product_service.dto.request.CreateProductRequest;
 import com.example.product_service.dto.request.ProductSearchEvent;
 import com.example.product_service.dto.request.UpdateProductRequest;
 import com.example.product_service.dto.response.ApiResponse;
+import com.example.product_service.exception.ErrorCode;
 import com.example.product_service.models.Category;
 import com.example.product_service.models.CharacterEntity;
 import com.example.product_service.models.Product;
@@ -110,32 +111,38 @@ public class ProductServiceImpl implements ProductService {
 
     private final RabbitTemplate rabbitTemplate;
 
-    public Product createProduct_rabbit(Product product) {
-        if (productRepository.existsById(product.getId())){
-            throw new RuntimeException("id is existed");
+    public ApiResponse<Product> createProduct_rabbit(Product product) {
+        if (!productRepository.existsById(product.getId())) {
+
+            // Gửi event sang RabbitMQ
+            ProductSearchEvent event = ProductSearchEvent.builder()
+                    .id(product.getId())
+                    .name(product.getName())
+                    .description(product.getDescription())
+                    .price(product.getPrice())
+                    .categories(product.getCategories().stream()
+                            .map(Category::getName)
+                            .toList())
+                    .characters(product.getCharacters().stream()
+                            .map(CharacterEntity::getName)
+                            .toList())
+                    .build();
+
+            rabbitTemplate.convertAndSend(
+                    RabbitMQConfig.EXCHANGE,
+                    RabbitMQConfig.ROUTING_KEY,
+                    event
+            );
+            System.out.println("📤 Sent to RabbitMQ: " + event.getName());
+            return ApiResponse.<Product>builder()
+                    .result(productRepository.save(product))
+                    .message("Create Product successfully")
+                    .build();
         }
-        Product saved = productRepository.save(product);
-
-        // Gửi event sang RabbitMQ
-        ProductSearchEvent event = ProductSearchEvent.builder()
-                .id(saved.getId())
-                .name(saved.getName())
-                .description(saved.getDescription())
-                .price(saved.getPrice())
-                .categories(saved.getCategories().stream()
-                        .map(Category::getName)
-                        .toList())
-                .characters(saved.getCharacters().stream()
-                        .map(CharacterEntity::getName)
-                        .toList())
+        return ApiResponse.<Product>builder()
+                .message(ErrorCode.PRODUCT_EXISTED.getMessage())
+                .code(ErrorCode.PRODUCT_EXISTED.getCode())
+                .statusCode(ErrorCode.PRODUCT_EXISTED.getHttpStatusCode())
                 .build();
-
-        rabbitTemplate.convertAndSend(
-                RabbitMQConfig.EXCHANGE,
-                RabbitMQConfig.ROUTING_KEY,
-                event
-        );
-        System.out.println("📤 Sent to RabbitMQ: " + event.getName());
-        return saved;
     }
 }

@@ -1,7 +1,5 @@
 package com.example.product_service.dto.request;
 
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
