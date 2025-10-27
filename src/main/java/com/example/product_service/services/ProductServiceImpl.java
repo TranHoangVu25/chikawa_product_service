@@ -33,28 +33,29 @@ public class ProductServiceImpl implements ProductService {
     ProductRepository productRepository;
     RestTemplate restTemplate;
     String CART_SERVICE_URL = "http://localhost:8082/api/v1/cart";
+    RabbitTemplate rabbitTemplate;
 
-    @Override
-    public ApiResponse<Product> createProduct(CreateProductRequest request) {
-        if (productRepository.existsById(request.getId())){
-            throw new RuntimeException("id is existed");
-        }
-        Product product = Product.builder()
-                .id(request.getId())
-                .name(request.getName())
-                .description(request.getDescription())
-                .price(request.getPrice())
-                .status(request.getStatus())
-                .vendor(request.getVendor())
-                .images(request.getImages())
-                .variants(request.getVariants())
-                .categories(request.getCategories())
-                .characters(request.getCharacters())
-                .build();
-        return ApiResponse.<Product>builder()
-                .result(productRepository.save(product))
-                .build();
-    }
+//    @Override
+//    public ApiResponse<Product> createProduct(CreateProductRequest request) {
+//        if (productRepository.existsById(request.getId())){
+//            throw new RuntimeException("id is existed");
+//        }
+//        Product product = Product.builder()
+//                .id(request.getId())
+//                .name(request.getName())
+//                .description(request.getDescription())
+//                .price(request.getPrice())
+//                .status(request.getStatus())
+//                .vendor(request.getVendor())
+//                .images(request.getImages())
+//                .variants(request.getVariants())
+//                .categories(request.getCategories())
+//                .characters(request.getCharacters())
+//                .build();
+//        return ApiResponse.<Product>builder()
+//                .result(productRepository.save(product))
+//                .build();
+//    }
 
     @Override
     public ApiResponse<Product> updateProduct(String id, UpdateProductRequest request) {
@@ -92,8 +93,6 @@ public class ProductServiceImpl implements ProductService {
             e.printStackTrace(); // Log stacktrace
             throw new RuntimeException("Error fetching products", e);
         }
-
-
     }
 
     @Override
@@ -109,11 +108,9 @@ public class ProductServiceImpl implements ProductService {
                 .build();
     }
 
-    private final RabbitTemplate rabbitTemplate;
-
-    public ApiResponse<Product> createProduct_rabbit(Product product) {
+    //create product and send data to RabbitMq
+    public ApiResponse<Product> createProduct(Product product) {
         if (!productRepository.existsById(product.getId())) {
-
             // Gửi event sang RabbitMQ
             ProductSearchEvent event = ProductSearchEvent.builder()
                     .id(product.getId())
@@ -142,7 +139,40 @@ public class ProductServiceImpl implements ProductService {
         return ApiResponse.<Product>builder()
                 .message(ErrorCode.PRODUCT_EXISTED.getMessage())
                 .code(ErrorCode.PRODUCT_EXISTED.getCode())
-                .statusCode(ErrorCode.PRODUCT_EXISTED.getHttpStatusCode())
+                .build();
+    }
+
+    //create product and send data to RabbitMq
+    public ApiResponse<Product> createProduct_rabbit(Product product) {
+        if (!productRepository.existsById(product.getId())) {
+            // Gửi event sang RabbitMQ
+            ProductSearchEvent event = ProductSearchEvent.builder()
+                    .id(product.getId())
+                    .name(product.getName())
+                    .description(product.getDescription())
+                    .price(product.getPrice())
+                    .categories(product.getCategories().stream()
+                            .map(Category::getName)
+                            .toList())
+                    .characters(product.getCharacters().stream()
+                            .map(CharacterEntity::getName)
+                            .toList())
+                    .build();
+
+            rabbitTemplate.convertAndSend(
+                    RabbitMQConfig.EXCHANGE,
+                    RabbitMQConfig.ROUTING_KEY,
+                    event
+            );
+            System.out.println("📤 Sent to RabbitMQ: " + event.getName());
+            return ApiResponse.<Product>builder()
+                    .result(productRepository.save(product))
+                    .message("Create Product successfully")
+                    .build();
+        }
+        return ApiResponse.<Product>builder()
+                .message(ErrorCode.PRODUCT_EXISTED.getMessage())
+                .code(ErrorCode.PRODUCT_EXISTED.getCode())
                 .build();
     }
 }

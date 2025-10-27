@@ -26,12 +26,12 @@ public class ProductController {
         return productService.findAllProduct();
     }
 
-    @PostMapping()
-    public ApiResponse<Product> createProduct(
-            @RequestBody CreateProductRequest request
-            ){
-        return productService.createProduct(request);
-    }
+//    @PostMapping()
+//    public ApiResponse<Product> createProduct(
+//            @RequestBody CreateProductRequest request
+//            ){
+//        return productService.createProduct(request);
+//    }
 
     //delete theo product id
     @DeleteMapping("/{productId}")
@@ -47,9 +47,10 @@ public class ProductController {
         return productService.updateProduct(productId,request);
     }
 
-    @PostMapping("/test")
-    public ApiResponse<Product> add(@RequestBody Product product) {
+    //create product and send data to rabbitMq
+    @PostMapping()
+    public ApiResponse<Product> createProduct(@RequestBody Product product) {
         log.info("in test rabbit mq");
-        return productService.createProduct_rabbit(product);
+        return productService.createProduct(product);
     }
 }
