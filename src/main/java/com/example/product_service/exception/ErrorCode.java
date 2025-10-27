@@ -7,6 +7,8 @@ import org.springframework.http.HttpStatusCode;
 @Getter
 public enum ErrorCode {
     PRODUCT_EXISTED(1001,"Product Id is existed",HttpStatus.BAD_REQUEST),
+    PRODUCT_NOT_EXISTED(1002,"Product Id is not existed",HttpStatus.BAD_REQUEST),
+
     ;
     private int code;
     private String message;
