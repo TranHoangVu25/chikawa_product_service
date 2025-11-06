@@ -1,5 +1,6 @@
 package com.example.product_service.dto.request;
 
+import com.example.product_service.Enums.Action;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,5 +20,6 @@ public class ProductSearchEvent implements Serializable {
     private Double price;
     private List<String> categories;
     private List<String> characters;
+    private Action action;
 }
 

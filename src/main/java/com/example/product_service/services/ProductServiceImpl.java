@@ -1,8 +1,7 @@
 package com.example.product_service.services;
 
+import com.example.product_service.Enums.Action;
 import com.example.product_service.configuration.RabbitMQConfig;
-import com.example.product_service.dto.request.CartItemRequest;
-import com.example.product_service.dto.request.CreateProductRequest;
 import com.example.product_service.dto.request.ProductSearchEvent;
 import com.example.product_service.dto.request.UpdateProductRequest;
 import com.example.product_service.dto.response.ApiResponse;
@@ -11,18 +10,13 @@ import com.example.product_service.models.Category;
 import com.example.product_service.models.CharacterEntity;
 import com.example.product_service.models.Product;
 import com.example.product_service.repositories.ProductRepository;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 import java.util.Optional;
@@ -37,47 +31,6 @@ public class ProductServiceImpl implements ProductService {
     public static final String CREATE_QUEUE = "search_create_queue";
     public static final String UPDATE_QUEUE = "search_update_queue";
     public static final String DELETE_QUEUE = "search_delete_queue";
-
-//    @Override
-//    public ApiResponse<Product> createProduct(CreateProductRequest request) {
-//        if (productRepository.existsById(request.getId())){
-//            throw new RuntimeException("id is existed");
-//        }
-//        Product product = Product.builder()
-//                .id(request.getId())
-//                .name(request.getName())
-//                .description(request.getDescription())
-//                .price(request.getPrice())
-//                .status(request.getStatus())
-//                .vendor(request.getVendor())
-//                .images(request.getImages())
-//                .variants(request.getVariants())
-//                .categories(request.getCategories())
-//                .characters(request.getCharacters())
-//                .build();
-//        return ApiResponse.<Product>builder()
-//                .result(productRepository.save(product))
-//                .build();
-//    }
-
-//    @Override
-//    public ApiResponse<Product> updateProduct(String id, UpdateProductRequest request) {
-//        Product product = productRepository.findById(id)
-//                .orElseThrow(() -> new RuntimeException("In update. Product was not found"));
-//        product.setName(request.getName());
-//        product.setDescription(request.getDescription());
-//        product.setPrice(request.getPrice());
-//        product.setStatus(request.getStatus());
-//        product.setVendor(request.getVendor());
-//        product.setImages(request.getImages());
-//        product.setVariants(request.getVariants());
-//        product.setCategories(request.getCategories());
-//        product.setCharacters(request.getCharacters());
-//
-//        return ApiResponse.<Product>builder()
-//                .result(productRepository.save(product))
-//                .build();
-//    }
 
     @Override
     public ApiResponse<List<Product>> findAllProduct() {
@@ -101,12 +54,13 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ResponseEntity<ApiResponse<String>> deleteProduct(String id) {
-
-        Product product = productRepository.findById(id)
+        Action action = Action.DELETE;
+        productRepository.findById(id)
                 .orElseThrow(()-> new RuntimeException(ErrorCode.PRODUCT_NOT_EXISTED.getMessage()));
         ProductSearchEvent e = ProductSearchEvent
                 .builder()
                 .id(id)
+                .action(action)
                 .build();
         productRepository.deleteById(id);
 
@@ -116,7 +70,7 @@ public class ProductServiceImpl implements ProductService {
                 e
                 );
 
-        System.out.println("==Send id: " + id + "to RabbitMq");
+        System.out.println("In delete request. Send id: " + id + "to RabbitMq");
         return ResponseEntity
                 .ok()
                 .body(
@@ -127,6 +81,7 @@ public class ProductServiceImpl implements ProductService {
 
     //create product and send data to RabbitMq
     public ApiResponse<Product> createProduct(Product product) {
+        Action action = Action.CREATE;
         if (!productRepository.existsById(product.getId())) {
             // Gửi event sang RabbitMQ
             ProductSearchEvent event = ProductSearchEvent.builder()
@@ -140,6 +95,7 @@ public class ProductServiceImpl implements ProductService {
                     .characters(product.getCharacters().stream()
                             .map(CharacterEntity::getName)
                             .toList())
+                    .action(action)
                     .build();
 
             rabbitTemplate.convertAndSend(
@@ -147,8 +103,9 @@ public class ProductServiceImpl implements ProductService {
                     RabbitMQConfig.ROUTING_KEY,
                     event
             );
-            System.out.println("Sent to RabbitMQ: " + event.getName());
+            System.out.println("Creation request. Sent to RabbitMQ: " + event.getName());
             return ApiResponse.<Product>builder()
+                    //save product in db
                     .result(productRepository.save(product))
                     .message("Create Product successfully")
                     .build();
@@ -162,6 +119,7 @@ public class ProductServiceImpl implements ProductService {
     //update product and send data to RabbitMq
     public ResponseEntity<ApiResponse<Product>> updateProduct(String id, UpdateProductRequest request) {
         try {
+            Action action = Action.UPDATE;
             Product existing = productRepository.findById(id)
                     .orElseThrow(() -> new RuntimeException(ErrorCode.PRODUCT_NOT_EXISTED.getMessage()));
 
@@ -175,21 +133,22 @@ public class ProductServiceImpl implements ProductService {
             existing.setCategories(request.getCategories());
             existing.setCharacters(request.getCharacters());
 
-            Product saved = productRepository.save(existing);
+            Product saved_product = productRepository.save(existing);
 
             // create event corresponding and send to RabbitMQ
             ProductSearchEvent event = ProductSearchEvent.builder()
-                    .id(saved.getId())
-                    .name(saved.getName())
-                    .description(saved.getDescription())
-                    .price(saved.getPrice())
-                    .categories(Optional.ofNullable(saved.getCategories())
+                    .id(saved_product.getId())
+                    .name(saved_product.getName())
+                    .description(saved_product.getDescription())
+                    .price(saved_product.getPrice())
+                    .categories(Optional.ofNullable(saved_product.getCategories())
                             .orElse(List.of())
                             .stream()
                             .map(Category::getName)
                             .toList())
-                    .characters(saved.getCharacters()
+                    .characters(saved_product.getCharacters()
                             .stream().map(CharacterEntity::getName).toList())
+                    .action(action)
                     .build();
 
             rabbitTemplate.convertAndSend(
@@ -197,13 +156,13 @@ public class ProductServiceImpl implements ProductService {
                     RabbitMQConfig.ROUTING_KEY,
                     event
             );
-
+            System.out.println("Update Product.");
             System.out.println("Sent to RabbitMQ: " + event.getName());
 
             return ResponseEntity
                     .ok().body(
                             ApiResponse.<Product>builder()
-                                    .result(saved)
+                                    .result(saved_product)
                                     .message("Product updated and event published")
                                     .build());
         } catch (Exception e) {

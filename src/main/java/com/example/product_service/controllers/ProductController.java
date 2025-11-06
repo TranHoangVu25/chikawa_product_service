@@ -27,13 +27,6 @@ public class ProductController {
         return productService.findAllProduct();
     }
 
-//    @PostMapping()
-//    public ApiResponse<Product> createProduct(
-//            @RequestBody CreateProductRequest request
-//            ){
-//        return productService.createProduct(request);
-//    }
-
     //delete theo product id
     @DeleteMapping("/{productId}")
     public ResponseEntity<ApiResponse<String>> deleteProduct(@PathVariable String productId) {

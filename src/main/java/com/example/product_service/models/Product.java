@@ -2,10 +2,9 @@ package com.example.product_service.models;
 
 import lombok.*;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.Field;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -18,6 +17,8 @@ public class Product {
     private String id;
 
     private String name;
+
+    private LocalDateTime created_at = LocalDateTime.now();
 
     private String description;
 
