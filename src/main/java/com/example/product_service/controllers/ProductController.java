@@ -1,6 +1,5 @@
 package com.example.product_service.controllers;
 
-import com.example.product_service.dto.request.CreateProductRequest;
 import com.example.product_service.dto.request.UpdateProductRequest;
 import com.example.product_service.dto.response.ApiResponse;
 import com.example.product_service.models.Product;

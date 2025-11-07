@@ -28,9 +28,6 @@ import java.util.Optional;
 public class ProductServiceImpl implements ProductService {
     ProductRepository productRepository;
     RabbitTemplate rabbitTemplate;
-    public static final String CREATE_QUEUE = "search_create_queue";
-    public static final String UPDATE_QUEUE = "search_update_queue";
-    public static final String DELETE_QUEUE = "search_delete_queue";
 
     @Override
     public ApiResponse<List<Product>> findAllProduct() {
@@ -66,7 +63,8 @@ public class ProductServiceImpl implements ProductService {
 
         rabbitTemplate.convertAndSend(
                 RabbitMQConfig.EXCHANGE,
-                RabbitMQConfig.ROUTING_KEY,
+//                RabbitMQConfig.ROUTING_KEY,
+                "",
                 e
                 );
 
@@ -100,7 +98,8 @@ public class ProductServiceImpl implements ProductService {
 
             rabbitTemplate.convertAndSend(
                     RabbitMQConfig.EXCHANGE,
-                    RabbitMQConfig.ROUTING_KEY,
+//                    RabbitMQConfig.ROUTING_KEY,   routing key cho kiểu topic
+                    "", //routing key cho fanout là ""
                     event
             );
             System.out.println("Creation request. Sent to RabbitMQ: " + event.getName());
@@ -153,7 +152,8 @@ public class ProductServiceImpl implements ProductService {
 
             rabbitTemplate.convertAndSend(
                     RabbitMQConfig.EXCHANGE,
-                    RabbitMQConfig.ROUTING_KEY,
+//                    RabbitMQConfig.ROUTING_KEY,
+                    "",
                     event
             );
             System.out.println("Update Product.");
@@ -170,4 +170,5 @@ public class ProductServiceImpl implements ProductService {
             throw new RuntimeException(e);
         }
     }
+
 }
