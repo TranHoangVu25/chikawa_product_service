@@ -2,7 +2,7 @@ package com.example.product_service.services;
 
 import com.example.product_service.Enums.Action;
 import com.example.product_service.configuration.RabbitMQConfig;
-import com.example.product_service.dto.request.ProductSearchEvent;
+import com.example.product_service.dto.request.ProductSendEvent;
 import com.example.product_service.dto.request.UpdateProductRequest;
 import com.example.product_service.dto.response.ApiResponse;
 import com.example.product_service.exception.ErrorCode;
@@ -54,7 +54,7 @@ public class ProductServiceImpl implements ProductService {
         Action action = Action.DELETE;
         productRepository.findById(id)
                 .orElseThrow(()-> new RuntimeException(ErrorCode.PRODUCT_NOT_EXISTED.getMessage()));
-        ProductSearchEvent e = ProductSearchEvent
+        ProductSendEvent e = ProductSendEvent
                 .builder()
                 .id(id)
                 .action(action)
@@ -82,17 +82,18 @@ public class ProductServiceImpl implements ProductService {
         Action action = Action.CREATE;
         if (!productRepository.existsById(product.getId())) {
             // Gửi event sang RabbitMQ
-            ProductSearchEvent event = ProductSearchEvent.builder()
+            ProductSendEvent event = ProductSendEvent.builder()
                     .id(product.getId())
                     .name(product.getName())
-                    .description(product.getDescription())
                     .price(product.getPrice())
+                    .status(product.getStatus())
                     .categories(product.getCategories().stream()
                             .map(Category::getName)
                             .toList())
                     .characters(product.getCharacters().stream()
                             .map(CharacterEntity::getName)
                             .toList())
+                    .images(product.getImages().stream().toList())
                     .action(action)
                     .build();
 
@@ -135,11 +136,11 @@ public class ProductServiceImpl implements ProductService {
             Product saved_product = productRepository.save(existing);
 
             // create event corresponding and send to RabbitMQ
-            ProductSearchEvent event = ProductSearchEvent.builder()
+            ProductSendEvent event = ProductSendEvent.builder()
                     .id(saved_product.getId())
                     .name(saved_product.getName())
-                    .description(saved_product.getDescription())
                     .price(saved_product.getPrice())
+                    .status(saved_product.getStatus())
                     .categories(Optional.ofNullable(saved_product.getCategories())
                             .orElse(List.of())
                             .stream()
@@ -147,6 +148,7 @@ public class ProductServiceImpl implements ProductService {
                             .toList())
                     .characters(saved_product.getCharacters()
                             .stream().map(CharacterEntity::getName).toList())
+                    .images(saved_product.getImages().stream().toList())
                     .action(action)
                     .build();
 
