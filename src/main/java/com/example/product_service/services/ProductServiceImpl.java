@@ -34,6 +34,14 @@ public class ProductServiceImpl implements ProductService {
     String CART_SERVICE_URL = "http://localhost:8082/api/v1/cart";
 
     @Override
+    public ApiResponse<Product> getProductById(String id) {
+        Product p = productRepository.findById(id).orElse(null);
+        return ApiResponse.<Product>builder()
+                .result(p)
+                .build();
+    }
+
+    @Override
     public ApiResponse<Product> createProduct(CreateProductRequest request) {
         if (productRepository.existsById(request.getId())){
             throw new RuntimeException("id is existed");

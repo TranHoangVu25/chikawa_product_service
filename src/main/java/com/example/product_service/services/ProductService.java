@@ -12,6 +12,8 @@ import java.util.List;
 
 @Service
 public interface ProductService {
+    ApiResponse<Product> getProductById(String id);
+
     ApiResponse<Product> createProduct(CreateProductRequest request);
 
     ApiResponse<Product> updateProduct(String productId,UpdateProductRequest request);
@@ -19,5 +21,6 @@ public interface ProductService {
     ApiResponse<List<Product>> findAllProduct();
 
     ApiResponse<String> deleteProduct(String productId);
+
     Product createProduct_rabbit(Product product);
 }

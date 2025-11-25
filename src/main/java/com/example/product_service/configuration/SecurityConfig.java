@@ -11,6 +11,9 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
 
 import java.util.List;
 
@@ -36,10 +39,12 @@ public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Excepti
     httpSecurity.authorizeHttpRequests(
             request ->
                     request
+                            .requestMatchers(HttpMethod.GET).permitAll()
                             .requestMatchers(HttpMethod.POST, USER_END_POINT).hasRole("CUSTOMER")
                             .requestMatchers(HttpMethod.PUT, USER_END_POINT).hasRole("CUSTOMER")
                             .requestMatchers(HttpMethod.DELETE, USER_END_POINT).hasRole("CUSTOMER")
                             .requestMatchers(HttpMethod.PUT, USER_END_POINT).hasRole("CUSTOMER")
+
 //                            .requestMatchers(HttpMethod.GET, ADMIN_END_POINT).hasRole("ADMIN")
                             .anyRequest().authenticated());
 
@@ -63,5 +68,24 @@ public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Excepti
         });
         return converter;
     }
+    @Bean
+    public CorsFilter corsFilter() {
+        CorsConfiguration corsConfiguration = new CorsConfiguration();
+
+//        corsConfiguration.addAllowedOrigin("*");
+        corsConfiguration.addAllowedOrigin("http://localhost:5173");
+
+        // Dòng này cần thiết để hỗ trợ `credentials: 'include'`
+        corsConfiguration.setAllowCredentials(true);
+        corsConfiguration.addAllowedMethod("*");
+        corsConfiguration.addAllowedHeader("*");
+
+
+        UrlBasedCorsConfigurationSource urlBasedCorsConfigurationSource = new UrlBasedCorsConfigurationSource();
+        urlBasedCorsConfigurationSource.registerCorsConfiguration("/**", corsConfiguration);
+
+        return new CorsFilter(urlBasedCorsConfigurationSource);
+    }
+
 }
 
