@@ -11,24 +11,24 @@ import org.springframework.web.filter.CorsFilter;
 @Configuration
 public class SecurityConfig {
 
-    @Bean
-    public CorsFilter corsFilter() {
-        CorsConfiguration corsConfiguration = new CorsConfiguration();
-
-//        corsConfiguration.addAllowedOrigin("*");
-        corsConfiguration.addAllowedOrigin("http://localhost:5173");
-
-        // Dòng này cần thiết để hỗ trợ `credentials: 'include'`
-        corsConfiguration.setAllowCredentials(true);
-        corsConfiguration.addAllowedMethod("*");
-        corsConfiguration.addAllowedHeader("*");
-
-
-        UrlBasedCorsConfigurationSource urlBasedCorsConfigurationSource = new UrlBasedCorsConfigurationSource();
-        urlBasedCorsConfigurationSource.registerCorsConfiguration("/**", corsConfiguration);
-
-        return new CorsFilter(urlBasedCorsConfigurationSource);
-    }
+//    @Bean
+//    public CorsFilter corsFilter() {
+//        CorsConfiguration corsConfiguration = new CorsConfiguration();
+//
+////        corsConfiguration.addAllowedOrigin("*");
+//        corsConfiguration.addAllowedOrigin("http://localhost:5173");
+//
+//        // Dòng này cần thiết để hỗ trợ `credentials: 'include'`
+//        corsConfiguration.setAllowCredentials(true);
+//        corsConfiguration.addAllowedMethod("*");
+//        corsConfiguration.addAllowedHeader("*");
+//
+//
+//        UrlBasedCorsConfigurationSource urlBasedCorsConfigurationSource = new UrlBasedCorsConfigurationSource();
+//        urlBasedCorsConfigurationSource.registerCorsConfiguration("/**", corsConfiguration);
+//
+//        return new CorsFilter(urlBasedCorsConfigurationSource);
+//    }
 
 }
 

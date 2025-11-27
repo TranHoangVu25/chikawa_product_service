@@ -3,12 +3,14 @@ package com.example.product_service.controllers;
 import com.example.product_service.dto.request.CreateProductRequest;
 import com.example.product_service.dto.request.UpdateProductRequest;
 import com.example.product_service.dto.response.ApiResponse;
+import com.example.product_service.dto.response.PageResponse;
 import com.example.product_service.models.Product;
 import com.example.product_service.services.ProductService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,9 +23,18 @@ import java.util.List;
 public class ProductController {
     ProductService productService;
 
-    @GetMapping("/all")
-    public ApiResponse<List<Product>> getAllProduct(){
-        return productService.findAllProduct();
+//    @GetMapping("/all")
+//    public ApiResponse<List<Product>> getAllProduct(){
+//        return productService.findAllProduct();
+//    }
+
+    @GetMapping
+    public  ApiResponse<PageResponse<Product>> getAllProduct(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "id,desc") String sort
+    ){
+        return productService.findAllProduct(page, size, sort);
     }
 
     @GetMapping("/{productId}")

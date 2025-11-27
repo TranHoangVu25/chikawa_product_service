@@ -1,11 +1,11 @@
 package com.example.product_service.services;
 
 import com.example.product_service.configuration.RabbitMQConfig;
-import com.example.product_service.dto.request.CartItemRequest;
 import com.example.product_service.dto.request.CreateProductRequest;
 import com.example.product_service.dto.request.ProductSearchEvent;
 import com.example.product_service.dto.request.UpdateProductRequest;
 import com.example.product_service.dto.response.ApiResponse;
+import com.example.product_service.dto.response.PageResponse;
 import com.example.product_service.models.Category;
 import com.example.product_service.models.CharacterEntity;
 import com.example.product_service.models.Product;
@@ -15,14 +15,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-
-import java.util.List;
 
 @Slf4j
 @Service
@@ -82,26 +80,54 @@ public class ProductServiceImpl implements ProductService {
                 .build();
     }
 
+    //    @Override
+//    public ApiResponse<List<Product>> findAllProduct() {
+//        try {
+//            List<Product> products = productRepository.findAll();
+//            if (products.isEmpty()){
+//                return ApiResponse.<List<Product>>builder()
+//                        .message("No product was found")
+//                        .result(List.of())
+//                        .build();
+//            }
+//            return ApiResponse.<List<Product>>builder()
+//                    .message("Get all products successfully")
+//                    .result(products)
+//                    .build();        } catch (Exception e) {
+//            e.printStackTrace(); // Log stacktrace
+//            throw new RuntimeException("Error fetching products", e);
+//        }
+//
+//
+//    }
     @Override
-    public ApiResponse<List<Product>> findAllProduct() {
-        try {
-            List<Product> products = productRepository.findAll();
-            if (products.isEmpty()){
-                return ApiResponse.<List<Product>>builder()
-                        .message("No product was found")
-                        .result(List.of())
-                        .build();
-            }
-            return ApiResponse.<List<Product>>builder()
-                    .message("Get all products successfully")
-                    .result(products)
-                    .build();        } catch (Exception e) {
-            e.printStackTrace(); // Log stacktrace
-            throw new RuntimeException("Error fetching products", e);
-        }
+    public ApiResponse<PageResponse<Product>> findAllProduct(int page, int size, String sort) {
+        String[] s = sort.split(",");
+        Pageable pageable = PageRequest.of(
+                page,
+                size,
+                Sort.by((s.length > 1 && s[1].equalsIgnoreCase("asc"))
+                                ? Sort.Direction.ASC : Sort.Direction.DESC,
+                        s[0])
+        );
 
+        Page<Product> p = productRepository.findAll(pageable);
 
+        PageResponse<Product> res = PageResponse.<Product>builder()
+                .items(p.getContent())
+                .page(p.getNumber())
+                .size(p.getSize())
+                .totalElements(p.getTotalElements())
+                .totalPages(p.getTotalPages())
+                .build();
+
+        return ApiResponse.<PageResponse<Product>>builder()
+                .message("Success")
+                .result(res)
+                .build();
     }
+
+
 
     @Override
     public ApiResponse<String> deleteProduct(String id) {

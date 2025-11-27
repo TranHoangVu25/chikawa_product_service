@@ -1,14 +1,12 @@
 package com.example.product_service.services;
 
-import com.example.product_service.dto.request.CartItemRequest;
 import com.example.product_service.dto.request.CreateProductRequest;
 import com.example.product_service.dto.request.UpdateProductRequest;
 import com.example.product_service.dto.response.ApiResponse;
+import com.example.product_service.dto.response.PageResponse;
 import com.example.product_service.models.Product;
-import lombok.Data;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 public interface ProductService {
@@ -18,7 +16,10 @@ public interface ProductService {
 
     ApiResponse<Product> updateProduct(String productId,UpdateProductRequest request);
 
-    ApiResponse<List<Product>> findAllProduct();
+//    ApiResponse<List<Product>> findAllProduct();
+
+    ApiResponse<PageResponse<Product>> findAllProduct(int page, int size, String sort);
+
 
     ApiResponse<String> deleteProduct(String productId);
 
