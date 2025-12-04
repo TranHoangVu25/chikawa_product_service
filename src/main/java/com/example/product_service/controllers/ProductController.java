@@ -46,4 +46,9 @@ public class ProductController {
         log.info("in test rabbit mq");
         return productService.createProduct(product);
     }
+
+    @PostMapping("/create-list")
+    public void createProductList(@RequestBody List<Product> products) {
+        productService.createListProduct(products);
+    }
 }

@@ -19,4 +19,6 @@ public interface ProductService {
     ResponseEntity<ApiResponse<String>> deleteProduct(String productId);
 
     ApiResponse<Product> createProduct(Product product);
+
+    void createListProduct(List<Product> products);
 }

@@ -173,4 +173,8 @@ public class ProductServiceImpl implements ProductService {
         }
     }
 
+    @Override
+    public void createListProduct(List<Product> products) {
+        productRepository.saveAll(products);
+    }
 }
