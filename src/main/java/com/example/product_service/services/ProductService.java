@@ -2,6 +2,7 @@ package com.example.product_service.services;
 
 import com.example.product_service.dto.request.UpdateProductRequest;
 import com.example.product_service.dto.response.ApiResponse;
+import com.example.product_service.dto.HomeProductDTO;
 import com.example.product_service.models.Product;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -21,4 +22,6 @@ public interface ProductService {
     ApiResponse<Product> createProduct(Product product);
 
     void createListProduct(List<Product> products);
+
+    ResponseEntity<ApiResponse<HomeProductDTO>> getHomeProduct();
 }

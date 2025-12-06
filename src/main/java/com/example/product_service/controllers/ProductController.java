@@ -2,6 +2,7 @@ package com.example.product_service.controllers;
 
 import com.example.product_service.dto.request.UpdateProductRequest;
 import com.example.product_service.dto.response.ApiResponse;
+import com.example.product_service.dto.HomeProductDTO;
 import com.example.product_service.models.Product;
 import com.example.product_service.services.ProductService;
 import lombok.AccessLevel;
@@ -50,5 +51,12 @@ public class ProductController {
     @PostMapping("/create-list")
     public void createProductList(@RequestBody List<Product> products) {
         productService.createListProduct(products);
+    }
+
+    @GetMapping("/home")
+    public  ResponseEntity<ApiResponse<HomeProductDTO>> Home(
+
+    ){
+        return productService.getHomeProduct();
     }
 }

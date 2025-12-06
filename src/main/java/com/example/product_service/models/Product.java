@@ -18,7 +18,7 @@ public class Product {
 
     private String name;
 
-    private LocalDateTime created_at = LocalDateTime.now();
+    private LocalDateTime createdAt = LocalDateTime.now();
 
     private String description;
 

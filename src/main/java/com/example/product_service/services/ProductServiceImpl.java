@@ -2,12 +2,15 @@ package com.example.product_service.services;
 
 import com.example.product_service.Enums.Action;
 import com.example.product_service.configuration.RabbitMQConfig;
+import com.example.product_service.dto.BestSellersDTO;
+import com.example.product_service.dto.NewArrivalsDTO;
 import com.example.product_service.dto.request.ProductSendEvent;
 import com.example.product_service.dto.request.UpdateProductRequest;
 import com.example.product_service.dto.response.ApiResponse;
 import com.example.product_service.exception.ErrorCode;
 import com.example.product_service.models.Category;
 import com.example.product_service.models.CharacterEntity;
+import com.example.product_service.dto.HomeProductDTO;
 import com.example.product_service.models.Product;
 import com.example.product_service.repositories.ProductRepository;
 import lombok.AccessLevel;
@@ -20,6 +23,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -173,8 +177,50 @@ public class ProductServiceImpl implements ProductService {
         }
     }
 
+    //Lưu nhiều product
     @Override
     public void createListProduct(List<Product> products) {
         productRepository.saveAll(products);
     }
-}
+
+    //lấy các prod cho home
+    @Override
+    public ResponseEntity<ApiResponse<HomeProductDTO>> getHomeProduct() {
+        try{
+        List<Product> bestSellers = productRepository.findRandom10Products();
+        List<Product> newArrivals = productRepository.findTop10ByOrderByCreatedAtDesc();
+
+        BestSellersDTO best = new BestSellersDTO().builder()
+//                .id(UUID.randomUUID().toString())
+                .id("101")
+                .name("Best Seller")
+                .description("Best selling products")
+                .slug("best-seller")
+                .products(bestSellers)
+                .build();
+
+        NewArrivalsDTO newArrivalsDTO = new NewArrivalsDTO().builder()
+//                .id(UUID.randomUUID().toString())
+                .id("102")
+                .name("New Arrival")
+                .description("New arrival products")
+                .slug("new-arrival")
+                .products(newArrivals)
+                .build();
+        HomeProductDTO homeProduct = new HomeProductDTO().builder()
+                .bestSellersDTO(best)
+                .newArrivalsDTO(newArrivalsDTO)
+                .build();
+        return ResponseEntity.ok()
+                .body(ApiResponse.<HomeProductDTO>builder()
+                        .message("Get homepage products successfully")
+                        .result(homeProduct)
+                        .build());
+    }catch (Exception e){
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.<HomeProductDTO>builder()
+                            .message(e.getMessage())
+                            .build());
+        }
+    }
+    }
