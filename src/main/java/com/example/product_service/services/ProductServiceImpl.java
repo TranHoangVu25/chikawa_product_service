@@ -7,6 +7,7 @@ import com.example.product_service.dto.NewArrivalsDTO;
 import com.example.product_service.dto.request.ProductSendEvent;
 import com.example.product_service.dto.request.UpdateProductRequest;
 import com.example.product_service.dto.response.ApiResponse;
+import com.example.product_service.dto.response.PageResponse;
 import com.example.product_service.exception.ErrorCode;
 import com.example.product_service.models.Category;
 import com.example.product_service.models.CharacterEntity;
@@ -18,6 +19,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -53,6 +58,54 @@ public class ProductServiceImpl implements ProductService {
         }
     }
 
+//    @Override
+//    public ApiResponse<PageResponse<Product>> findAllProduct(int page) {
+//        try {
+//            int size = 8; // FIX CỨNG 8 SẢN PHẨM / PAGE
+//
+//            Pageable pageable = PageRequest.of(
+//                    page,
+//                    size,
+//                    Sort.by("createdAt").descending()
+//            );
+//
+//            Page<Product> productPage = productRepository.findAll(pageable);
+//
+//            if (productPage.isEmpty()) {
+//                return ApiResponse.<PageResponse<Product>>builder()
+//                        .message("No product was found")
+//                        .result(
+//                                PageResponse.<Product>builder()
+//                                        .data(List.of())
+//                                        .page(page)
+//                                        .size(size)
+//                                        .totalElements(0)
+//                                        .totalPages(0)
+//                                        .last(true)
+//                                        .build()
+//                        )
+//                        .build();
+//            }
+//
+//            PageResponse<Product> pageResponse = PageResponse.<Product>builder()
+//                    .data(productPage.getContent())
+//                    .page(productPage.getNumber())
+//                    .size(productPage.getSize())
+//                    .totalElements(productPage.getTotalElements())
+//                    .totalPages(productPage.getTotalPages())
+//                    .last(productPage.isLast())
+//                    .build();
+//
+//            return ApiResponse.<PageResponse<Product>>builder()
+//                    .message("Get products successfully")
+//                    .result(pageResponse)
+//                    .build();
+//
+//        } catch (Exception e) {
+//            throw new RuntimeException("Error fetching products", e);
+//        }
+//    }
+
     @Override
     public ResponseEntity<ApiResponse<String>> deleteProduct(String id) {
         Action action = Action.DELETE;
@@ -84,7 +137,8 @@ public class ProductServiceImpl implements ProductService {
     //create product and send data to RabbitMq
     public ApiResponse<Product> createProduct(Product product) {
         Action action = Action.CREATE;
-        if (!productRepository.existsById(product.getId())) {
+        String productId = UUID.randomUUID().toString();
+        if (!productRepository.existsById(productId)) {
             // Gửi event sang RabbitMQ
             ProductSendEvent event = ProductSendEvent.builder()
                     .id(product.getId())
@@ -223,4 +277,33 @@ public class ProductServiceImpl implements ProductService {
                             .build());
         }
     }
+
+    @Override
+    public ResponseEntity<ApiResponse<Product>> getProductById(String productId) {
+        try {
+
+        if(productRepository.findById(productId).isEmpty()){
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.<Product>builder()
+                            .code(ErrorCode.PRODUCT_NOT_EXISTED.getCode())
+                            .message(ErrorCode.PRODUCT_NOT_EXISTED.getMessage())
+                            .build());
+        }
+        Product product = productRepository.findById(productId)
+                .orElseThrow(()-> new RuntimeException(ErrorCode.PRODUCT_NOT_EXISTED.getMessage()));
+
+        return ResponseEntity.ok()
+                .body(ApiResponse.<Product>builder()
+                        .message("Get product:"+product.getId())
+                        .result(product)
+                        .build());
     }
+    catch (Exception e){
+            log.error(e.getMessage());
+        return ResponseEntity.ok()
+            .body(ApiResponse.<Product>builder()
+                    .message(e.getMessage())
+                    .build());
+    }
+    }
+}

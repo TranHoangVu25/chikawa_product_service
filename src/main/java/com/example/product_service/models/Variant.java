@@ -7,6 +7,7 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class Variant {
-    private String name;    // Ví dụ: "Chiikawa"
-    private String img;     // URL ảnh của biến thể
+    private String id;
+    private String name;
+    private String img;
 }
